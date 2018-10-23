@@ -1,17 +1,24 @@
 from flask import Flask, request, jsonify
+import json
 
 app = Flask(__name__)
 
 @app.route("/get_classifier_result/<version>", methods=['GET', 'POST'])
 def return_classifier_result(version):
-    #TODO прочитать из полученного запроса json-контент
-    #В случае, если version==1, то должен вернуться json с версией и полем predict из входящего jsonа {"version":1, "predict":<predict_value>}
-    #В случае, если version==0, то должен вернуться json с версией и полем old_predict из входящего jsonа {"version":0, "predict":<old_predict_value>}
+    answer = request.get_json()
+    vers=int(version)
+    if vers==1:
+        data={'version': 1, "predict": answer['predict']}
+        js1=json.dumps(data)
+        return json.dumps({'version': 1, "predict": answer['predict']})
+    elif vers==0:
+        return json.dumps({'version': 0, "predict": answer['old_predict']})
+    else:
+        return 'You are wrong!'
 
 @app.route("/")
 def hello():
-    #TODO должна возвращатьс инструкция по работе с сервером
-    return
+    return 'Hello! This server represents a storage of classifier results, so you may return both old and actual predictions. If you would like to return the previous one, you should type \'/get_classifier_result/0\', otherwise type \'/get_classifier_result/1\'. Have a nice day!'
 
 if __name__ == "__main__":
     app.run()
